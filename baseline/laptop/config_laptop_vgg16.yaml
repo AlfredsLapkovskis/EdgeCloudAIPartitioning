@@ -1,0 +1,7 @@
+# Laptop-only baseline for VGG-16. No Pi, no PC, no chain — runs the entire
+# model on the laptop CPU end-to-end. Reference for "what does this cost on
+# a single machine" comparisons.
+
+model: vgg16
+total_runs: 500
+warmup: 3

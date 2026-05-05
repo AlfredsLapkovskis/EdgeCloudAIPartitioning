@@ -1,0 +1,9 @@
+# Static baseline config for AlexNet with a fixed Pi/Laptop+avgpool/PC=classifier
+# layout. The split is hardcoded in static_alexnet.py — only network and run
+# count are configurable here.
+
+pi_addr: "tcp://100.122.12.41:5555"
+laptop_addr: "tcp://100.103.212.124:5556"
+
+total_runs: 500
+warmup: 3

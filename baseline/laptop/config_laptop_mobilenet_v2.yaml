@@ -1,0 +1,5 @@
+# Laptop-only baseline for MobileNetV2.
+
+model: mobilenet_v2
+total_runs: 503
+warmup: 3

@@ -1,0 +1,42 @@
+# Config for AlexNet. Same network setup as the VGG-16 config — only the
+# `model:` line and `initial_split` differ.
+
+model: alexnet
+
+# pi_addr     = address the LAPTOP binds (Pi connects here)   -> Laptop's Tailscale IP
+# laptop_addr = address the PC binds     (Laptop connects here) -> PC's Tailscale IP
+pi_addr: "tcp://100.122.12.41:5555"
+laptop_addr: "tcp://100.103.212.124:5556"
+
+laptop_host: "100.64.0.2"
+pc_host: "100.64.0.3"
+
+# AlexNet's model.features has 13 children (indices 0..12).
+# Reasonable starting point: Pi runs through pool 1 (index 2), Laptop runs
+# the middle convs, PC gets the last conv block + classifier.
+# Static baseline split: i=2 (after first MaxPool), j=10 (after third Conv).
+initial_split: [2, 10]
+
+profile_runs: 50
+steady_runs: 100
+total_runs: 500
+warmup: 3
+probe_runs_per_split: 15   # extra inferences per reference split during Phase 1
+
+weights:
+  pi_e: 0.6
+  tot_e: 0.3
+  lat: 0.1
+
+switch_threshold: 0.03
+
+# AlexNet's first Conv uses stride 4, so the output is 64x55x55 = 750 KB,
+# much smaller than VGG's 12.8 MB. The pathological "minimum Pi work" case
+# from VGG doesn't apply, and min_pi_layers=1 is fine.
+min_pi_layers: 1
+
+# AlexNet is much faster than VGG, baseline latency on Pi alone is ~130 ms.
+# A 250 ms deadline gives reasonable headroom for the chain.
+max_latency_ms: 250
+
+iperf_on_start: false
