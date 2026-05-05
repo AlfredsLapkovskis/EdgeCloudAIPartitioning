@@ -1,0 +1,5 @@
+# Laptop-only baseline for AlexNet.
+
+model: alexnet
+total_runs: 503
+warmup: 3

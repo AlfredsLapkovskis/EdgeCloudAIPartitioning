@@ -1,0 +1,50 @@
+# Config for MobileNetV2. Same network setup as VGG/AlexNet — only the
+# `model:` line, initial_split, and min_pi_layers differ.
+
+model: mobilenet_v2
+
+# pi_addr     = address the LAPTOP binds (Pi connects here)   -> Laptop's Tailscale IP
+# laptop_addr = address the PC binds     (Laptop connects here) -> PC's Tailscale IP
+pi_addr: "tcp://100.122.12.41:5555"
+laptop_addr: "tcp://100.103.212.124:5556"
+
+laptop_host: "100.64.0.2"
+pc_host: "100.64.0.3"
+
+# MobileNetV2's model.features has 19 children (indices 0..18).
+# - features[0]:   ConvBNReLU (stride 2)
+# - features[1..17]: InvertedResidual blocks (each atomic, with internal skip).
+#   Stride-2 (downsampling) blocks sit at indices 2, 4, 7, 14.
+# - features[18]:  final ConvBNReLU (expands to 1280 channels)
+#
+# Splits are restricted to top-level children boundaries. Cuts inside an
+# InvertedResidual are not allowed — its skip connection would break.
+#
+# Reasonable baseline: Pi runs through the 2nd downsampling block (index 4),
+# Laptop runs the middle residuals (5..14), PC runs the last 3 blocks + head.
+initial_split: [4, 14]
+
+profile_runs: 50
+steady_runs: 100
+total_runs: 500
+warmup: 3
+probe_runs_per_split: 15
+
+weights:
+  pi_e: 0.6
+  tot_e: 0.3
+  lat: 0.1
+
+switch_threshold: 0.03
+
+# MobileNetV2 is lightweight (designed for mobile), so the Pi can handle
+# more of it comfortably. min_pi_layers: 1 is fine — the first block's
+# output is only 112x112x32 = ~1.6 MB so there's no pathological payload
+# problem like VGG's 12.8 MB first conv.
+min_pi_layers: 1
+
+# Pi-only baseline latency is ~72 ms. A 200 ms deadline gives ~2.7x headroom
+# for the chain while still rejecting pathological slow splits.
+max_latency_ms: 200
+
+iperf_on_start: false

@@ -1,0 +1,44 @@
+# pi_addr   = address the LAPTOP binds (Pi connects here)  -> Laptop's Tailscale IP
+# laptop_addr = address the PC binds   (Laptop connects here) -> PC's Tailscale IP
+
+model: vgg16
+
+pi_addr:    "tcp://100.122.12.41:5555"
+laptop_addr: "tcp://100.103.212.124:5556"
+
+# Hostnames used only by the iperf3 probe (no port)
+laptop_host: "100.64.0.2"
+pc_host:     "100.64.0.3"
+
+initial_split: [10, 30]
+
+profile_runs: 50
+steady_runs:  100
+total_runs:   500
+warmup:       3
+probe_runs_per_split: 15   # extra inferences per reference split during Phase 1
+
+weights:
+  pi_e:  0.6
+  tot_e: 0.3
+  lat:   0.1
+
+switch_threshold: 0.03
+
+# Minimum number of feature layers the Pi must own. The first Conv's output
+# is 64x224x224 = 12.8 MB; payload only drops after the first MaxPool at
+# index 4. Setting this to 5 forces Pi to own indices 0..4 (i.e. through the
+# first pool), so the smallest payload it can ever send is 3.2 MB instead.
+min_pi_layers: 1
+
+# Hard latency deadline in milliseconds. 0 disables it.
+# Candidates whose ESTIMATED latency exceeds this are filtered out of the
+# search. If a 100-run window's MEASURED latency exceeds it, the current
+# split is blacklisted and the scheduler force-switches (or falls back to
+# the baseline split if nothing satisfies the deadline).
+max_latency_ms: 700
+
+# Set true to run a 3-second iperf3 probe at startup. Requires `iperf3 -s`
+# already running on laptop_host (for the Pi probe) and on pc_host
+# (for the Laptop probe).
+iperf_on_start: false

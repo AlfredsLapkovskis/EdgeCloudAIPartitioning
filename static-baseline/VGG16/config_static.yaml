@@ -1,0 +1,15 @@
+# Static baseline config for VGG-16 — runs a fixed split for the entire run
+# so its energy/latency numbers can be compared to the adaptive scheduler.
+
+# Same network setup as the adaptive config so the link conditions match.
+pi_addr: "tcp://100.122.12.41:5555"
+laptop_addr: "tcp://100.103.212.124:5556"
+
+# Static split: Pi owns features[0..10], Laptop owns features[11..30],
+# PC runs only the head. This is the same baseline the adaptive scheduler
+# uses as its (10, 30) reference, so the two runs are directly comparable.
+static_split: [10, 30]
+
+# Match the adaptive run's inference count for fair comparison.
+total_runs: 500
+warmup: 3
