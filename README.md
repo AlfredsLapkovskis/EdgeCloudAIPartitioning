@@ -1,1 +1,1 @@
-# Thesis-experiment
+# EdgeCloudAIPartitioning
